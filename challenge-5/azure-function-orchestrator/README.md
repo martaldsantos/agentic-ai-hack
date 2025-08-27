@@ -184,10 +184,11 @@ az functionapp create \
   --resource-group myResourceGroup \
   --consumption-plan-location westus \
   --runtime python \
-  --runtime-version 3.9 \
+  --runtime-version 3.11 \
   --functions-version 4 \
   --name myInsuranceClaimFunction \
   --storage-account mystorageaccount
+  --os-type Linux
 ```
 
 2. Configure application settings:
