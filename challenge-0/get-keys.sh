@@ -162,8 +162,6 @@ else
     appInsightsInstrumentationKey=""
 fi
 
-<<<<<<< HEAD
-=======
 # Get Document Intelligence service name and keys
 echo "Getting Document Intelligence service information..."
 docIntelServiceName=$(az deployment group show --resource-group $resourceGroupName --name $deploymentName --query "properties.outputs.documentIntelligenceName.value" -o tsv 2>/dev/null || echo "")
@@ -184,7 +182,6 @@ fi
 
 # Add this section after getting the search service information (around line 100)
 
->>>>>>> ms
 # Get Azure AI Search connection ID
 # Note: The 'az cognitiveservices account connection' command is not available in all Azure CLI versions
 # We'll construct the connection ID manually later in the script
@@ -252,13 +249,10 @@ echo "AZURE_STORAGE_ACCOUNT_NAME=\"$storageAccountName\"" >> ../.env
 echo "AZURE_STORAGE_ACCOUNT_KEY=\"$storageAccountKey\"" >> ../.env
 echo "AZURE_STORAGE_CONNECTION_STRING=\"$storageAccountConnectionString\"" >> ../.env
 
-<<<<<<< HEAD
-=======
 # Azure Document Intelligence
 echo "AZURE_DOC_INTEL_ENDPOINT=\"$docIntelEndpoint\"" >> ../.env
 echo "AZURE_DOC_INTEL_KEY=\"$docIntelKey\"" >> ../.env
 
->>>>>>> ms
 # Other Azure services
 echo "LOG_ANALYTICS_WORKSPACE_NAME=\"$logAnalyticsWorkspaceName\"" >> ../.env
 echo "SEARCH_SERVICE_NAME=\"$searchServiceName\"" >> ../.env
@@ -315,8 +309,6 @@ echo "Log Analytics Workspace: $logAnalyticsWorkspaceName"
 echo "Search Service: $searchServiceName"
 echo "API Management: $apiManagementName"
 echo "AI Foundry Hub: $aiFoundryHubName"
-<<<<<<< HEAD
-=======
 echo "AI Foundry Project: $aiFoundryProjectName"
 echo "Key Vault: $keyVaultName"
 echo "Container Registry: $containerRegistryName"
@@ -331,7 +323,6 @@ if [ -n "$cosmosDbAccountName" ]; then
 else
     echo "Cosmos DB: NOT FOUND - You may need to deploy this service"
 fi
->>>>>>> ms
 echo "Environment file created: ../.env"
 
 # Show what needs to be deployed
@@ -339,11 +330,8 @@ missing_services=""
 if [ -z "$storageAccountName" ]; then missing_services="$missing_services Storage"; fi
 if [ -z "$searchServiceName" ]; then missing_services="$missing_services Search"; fi
 if [ -z "$aiFoundryHubName" ]; then missing_services="$missing_services AI-Foundry"; fi
-<<<<<<< HEAD
-=======
 if [ -z "$docIntelServiceName" ]; then missing_services="$missing_services Document-Intelligence"; fi
 if [ -z "$cosmosDbAccountName" ]; then missing_services="$missing_services Cosmos-DB"; fi
->>>>>>> ms
 
 if [ -n "$missing_services" ]; then
     echo ""
