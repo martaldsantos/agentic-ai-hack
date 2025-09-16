@@ -8,6 +8,8 @@ ACR_NAME="" #FILL
 IMAGE_NAME="insurance-orchestrator:latest"
 CONTAINER_APP_NAME="" #FILL
 DOCKERFILE_PATH="."
+SUBSCRIPTION_ID="" #FILL
+
 
 echo "🚀 Starting deployment to Azure Container Apps..."
 
@@ -75,7 +77,7 @@ echo "🔐 Assigning permissions to managed identity..."
 az role assignment create \
   --assignee $PRINCIPAL_ID \
   --role "Cognitive Services User" \
-  --scope "/subscriptions/af26648a-f8fe-4c1e-ac30-98c4aea17ae2/resourceGroups/rghack"
+  --scope "/subscriptions/$SUBSCRIPTION_ID/resourceGroups/$RESOURCE_GROUP"
 
 # Output info
 echo "✅ Container App '$CONTAINER_APP_NAME' created successfully!"
