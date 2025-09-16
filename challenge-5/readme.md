@@ -60,6 +60,19 @@ In Semantic Kernel's Concurrent Orchestration, [`tasks`](https://learn.microsoft
 
 ### Step-by-step deployment instructions:
 
+#### Part 0 - Service Principal Setup 
+
+To enable automated access to AI services, you need to create an Azure AD app registration and service principal.
+
+Run the following command to create both and extract the client ID and object ID:
+
+```bash
+cd challenge-0 && ./create-app-registration.sh YOUR_APP_NAME
+```
+
+Replace YOUR_APP_NAME with a unique name for your app registration (e.g., hackathon-yourinitials).
+The script will output the Client ID and Object ID.
+
 #### Part 1 - Run your orchestrator locally
 
 1. Open `challenge-5/deployment/local-test.sh` file and replace `RESOURCE_GROUP` value with your resource group name. **Run the helper script** for automated setup and testing:
