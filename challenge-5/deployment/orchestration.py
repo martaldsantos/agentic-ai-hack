@@ -549,11 +549,32 @@ Do not provide generic responses - base your analysis on the specific claim data
         await runtime.stop_when_idle()
         print(f"\n🧹 Orchestration cleanup complete.")
 
+from fastapi import FastAPI, Query
+from fastapi.responses import JSONResponse
+import uvicorn
+
+app = FastAPI()
+
+@app.post("/orchestrate")
+async def orchestrate_claim(
+    claim_id: str = Query(..., description="Claim ID to process"),
+    policy_number: str = Query(..., description="Policy number to process")
+):
+    try:
+        result = await run_insurance_claim_orchestration(claim_id, policy_number)
+        return JSONResponse(content={"analysis": result})
+    except Exception as e:
+        return JSONResponse(content={"error": str(e)}, status_code=500)
+
 if __name__ == "__main__":
     import os
-    # Get claim ID and policy number from environment variables or use defaults
-    claim_id = os.environ.get("CLAIM_ID", "CL001")  # Use a real claim ID
-    policy_number = os.environ.get("POLICY_NUMBER", "LIAB-AUTO-001")  # Use a real policy number
-    
-    print(f"Processing Claim ID: {claim_id}, Policy Number: {policy_number}")
-    asyncio.run(run_insurance_claim_orchestration(claim_id, policy_number))
+    import sys
+    # Optionally allow running as script or API
+    if len(sys.argv) > 1 and sys.argv[1] == "api":
+        uvicorn.run("orchestration:app", host="0.0.0.0", port=8000, reload=True)
+    else:
+        # Get claim ID and policy number from environment variables or use defaults
+        claim_id = os.environ.get("CLAIM_ID", "CL001")  # Use a real claim ID
+        policy_number = os.environ.get("POLICY_NUMBER", "LIAB-AUTO-001")  # Use a real policy number
+        print(f"Processing Claim ID: {claim_id}, Policy Number: {policy_number}")
+        asyncio.run(run_insurance_claim_orchestration(claim_id, policy_number))
