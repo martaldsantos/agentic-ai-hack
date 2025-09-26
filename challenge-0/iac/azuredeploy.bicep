@@ -300,6 +300,16 @@ resource embeddingDeployment 'Microsoft.CognitiveServices/accounts/deployments@2
   Create RBAC assignments for the AI Hub and Project managed identities
 */
 
+var storageBlobDataContributorRoleId = subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')
+resource storageBlobDataContributorRoleAssignement 'Microsoft.Authorization/roleAssignments@2022-04-01'= {
+  scope: storageAccount
+  name: guid(resourceGroup().id, storageAccount.id, 'Deployer', storageBlobDataContributorRoleId)
+  properties: {
+    roleDefinitionId: storageBlobDataContributorRoleId
+    principalId: az.deployer().objectId
+  }
+}
+
 // Get the Cognitive Services User role definition
 var cognitiveServicesUserRoleId = subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'a97b65f3-24c7-4388-baec-2e87135dc908')
 
