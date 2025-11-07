@@ -119,7 +119,8 @@ ruamel.yaml==0.18.14
 ruamel.yaml.clib==0.2.12
 scikit-learn==1.7.1
 scipy==1.16.0
-semantic-kernel==1.36.0
+agent-framework>=1.0.0b1
+agent-framework-azure-ai>=1.0.0b1
 six==1.17.0
 sniffio==1.3.1
 sse-starlette==2.4.1
@@ -144,4 +145,5 @@ azure-ai-evaluation==1.9.0
 azure-functions
 azure-cosmos
 azure-identity
-semantic-kernel==1.36.0
+agent-framework>=1.0.0b1
+agent-framework-azure-ai>=1.0.0b1

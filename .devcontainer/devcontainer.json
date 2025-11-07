@@ -11,7 +11,7 @@
             "enableNonRootDocker": "true"
         }
     },
-    "postCreateCommand": "pip3 install --user -r requirements.txt",
+    "postCreateCommand": "pip3 install --user -r requirements.txt && curl -fsSL https://aka.ms/install-azd.sh | bash",
     "customizations": {
         "vscode": {
             "extensions": [

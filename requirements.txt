@@ -17,6 +17,8 @@ azure-ai-projects==1.0.0b12
 azure-common==1.1.28
 azure-core==1.35.0
 azure-identity==1.23.1
+agent-framework>=1.0.0b1
+agent-framework-azure-ai>=1.0.0b1
 azure-search==1.0.0b2
 azure-search-documents==11.5.3
 azure-storage-blob==12.25.1

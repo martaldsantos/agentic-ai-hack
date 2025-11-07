@@ -2,15 +2,13 @@
 
 **Expected Duration:** 30 minutes
 
-Welcome to your very first challenge! Your goal in this challenge is to create the services and enviornment necessary to conduct this hackathon. You will deploy the required resources in Azure, create your development enviornment and all the assets necessary for the subsequent challenges. By completing this challenge, you will set up the foundation for the rest of the hackathon. 
+Welcome to your very first challenge! Your goal in this challenge is to create the services and enviornment necessary to conduct this hackathon. You will deploy the required resources in Azure, create your development enviornment and all the assets necessary for the subsequent challenges. By completing this challenge, you will set up the foundation for the rest of the hackathon.
 
 If something is not working correctly, please do let your coach know!
-
 
 ## 1.1 Fork the Repository
 
 Before you start, please fork this repository to your GitHub account by clicking the `Fork` button in the upper right corner of the repository's main screen (or follow the [documentation](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo#forking-a-repository)). This will allow you to make changes to the repository and save your progress.
-
 
 ## 1.2 Development Environment
 
@@ -24,40 +22,43 @@ Please select your forked repository from the dropdown and, if necessary, adjust
 
 **NOTE:** If GitHub Codespaces is not enabled in your organization, you can enable it by following the instructions [here](https://docs.github.com/en/codespaces/managing-codespaces-for-your-organization/enabling-or-disabling-github-codespaces-for-your-organization), or, if you cannot change your GitHub organization's settings, create a free personal GitHub account [here](https://github.com/signup?ref_cta=Sign+up&ref_loc=header+logged+out&ref_page=%2F&source=header-home). The Github Free Plan includes 120 core hours per month, equivalent to 60 hours on a 2-core machine, along with 15 GB of storage.
 
-
 ## 1.3 Resource Deployment Guide
-The first step on this hackathon will be to create the resources we will use throughout the day. You can deploy using either the one-click button or manual method below.
 
-Before anything else, let's log in into the CLI with our account. Please paste the code underneath and follow the necessary instructions.
+We're now using the [Azure Developer CLI (azd)](https://learn.microsoft.com/azure/developer/azure-developer-cli/) to deploy the environment defined in `challenge-0/azure.yaml`. The Bicep template that provisions every resource lives in `challenge-0/infra/main.bicep`.
 
-```bash
-az login --use-device-code
+### Prerequisites
+
+- Install the Azure CLI and Azure Developer CLI (`azd`).
+- Ensure you have the required Azure permissions to create resources and role assignments in your subscription.
+
+### Deploy with azd
+
+From the repository root, run the following commands:
+
+```powershell
+azd auth login
+azd env new <environment-name> --location swedencentral
+azd up
 ```
 
-## 1.3.1 Resources Deployment
+- Replace `<environment-name>` with a friendly name (for example, `hackathon`).
+- The `azd env new` command seeds environment configuration and prompts for the subscription and resource group name. The default location (`swedencentral`) aligns with the template.
+- Create a new resource group when prompted (for example, `rg-aihackaton-<abc>` where `abc` are the first three letters of your last name).
 
-Now, time to deploy our resources to Azure!
-
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmartaldsantos%2Fagentic-ai-hack%2Fmain%2Fchallenge-0%2Fiac%2Fazuredeploy.json)
-
-**Deployment Parameters:**
-- servicePrincipalObjectId: Leave this field empty.
-- resource group: Introduce the unique name for your resource group (example: rg-user01-yourinitials).
-
-**NOTE:** Some parts of your deployment may fail if the resource provider `Microsoft.AlertsManagement` is not registered in your. Follow the [documentation](https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/resource-providers-and-types#register-resource-provider-1) to register it and the re-run the deployment.
-
-Resource deployment can take up to 10 minutes, afterwards you'll be able to find most of the resources on your resource group. 
+The deployment usually completes within 10 minutes and creates all dependent role assignments automatically. If the deployment fails due to a missing resource provider (for example, `Microsoft.AlertsManagement`), register it and re-run `azd up`.
 
 ## 1.4 Verify the creation of your resources
 
-Go back to your `Azure Portal` and find your `Resource Group`that should by now contain 9 resources and look like this:
+Go back to your `Azure Portal` and find your `Resource Group` that should by now contain the storage account, Azure AI Foundry hub and project, Azure AI Search, Cosmos DB (serverless), Container Registry, Log Analytics workspace with Application Insights, and a Key Vault.
 
 ![alt text](image.png)
 
 ## 1.5 Let's retrieve the necessary keys
+
 After deploying the resources, you will need to configure the environment variables in the `.env` file. Double check you have logged in into your Azure account on the CLI. If that's settled, let's move into retrieving our keys. The `.env` file is a configuration file that contains the environment variables for the application. The `.env` file is automatically created by running the following command within the terminal in your Codespace.
 
 **Then run the get-keys script with your resource group name:**
+
 ```bash
 cd challenge-0 && ./get-keys.sh --resource-group YOUR_RESOURCE_GROUP_NAME
 ```
@@ -75,6 +76,7 @@ The repo has an `.env.sample` file that shows the relevant environment variables
 If the file is not created, simply copy over `.env.sample` to `.env` - then populate those values manually from the respective Azure resource pages using the Azure Portal.
 
 ## Conclusion
+
 By reaching this section you should have every resource and installed the requirements necessary to conduct the hackathon. In the next challenges, you will use these services to start strongly your Azure AI Agents journey.
 
 Now the real fun begins!

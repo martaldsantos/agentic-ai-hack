@@ -1,0 +1,10 @@
+name: agentic-ai-hack-challenge-0
+metadata:
+  template: challenge-0
+infra:
+  provider: bicep
+  path: ./infra
+  template: main.bicep
+  parameters:
+    location: ${AZURE_LOCATION}
+    servicePrincipalObjectId: ${SERVICE_PRINCIPAL_OBJECT_ID:-''}

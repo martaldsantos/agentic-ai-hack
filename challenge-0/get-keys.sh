@@ -1,8 +1,8 @@
 #!/bin/bash
 #
-# This script will retrieve necessary keys and properties from Azure Resources 
-# deployed using "Deploy to Azure" button and will store them in a file named
-# ".env" in the parent directory.
+# This script retrieves the keys and connection information emitted by the
+# Challenge 0 infrastructure deployment (now managed via Azure Developer CLI)
+# and stores them in a file named ".env" in the repository root.
 
 # Login to Azure
 if [ -z "$(az account show)" ]; then
@@ -30,9 +30,14 @@ fi
 
 # Get resource group deployments, find deployments starting with 'Microsoft.Template' and sort them by timestamp
 echo "Getting the deployments in '$resourceGroupName'..."
-deploymentName=$(az deployment group list --resource-group $resourceGroupName --query "[?contains(name, 'Microsoft.Template') || contains(name, 'azuredeploy')].{name:name}[0].name" --output tsv)
+deploymentName=$(az deployment group list --resource-group $resourceGroupName --query "sort_by([], &properties.timestamp)[-1].name" --output tsv)
 if [ $? -ne 0 ]; then
     echo "Error occurred while fetching deployments. Exiting..."
+    exit 1
+fi
+
+if [ -z "$deploymentName" ]; then
+    echo "No deployments found in resource group '$resourceGroupName'. Ensure 'azd up' completed successfully."
     exit 1
 fi
 
@@ -63,7 +68,7 @@ aiFoundryProjectEndpoint=$(az deployment group show --resource-group $resourceGr
 
 
 # If deployment outputs are empty, try to discover resources by type
-if [ -z "$storageAccountName" ] || [ -z "$logAnalyticsWorkspaceName" ] || [ -z "$apiManagementName" ] || [ -z "$keyVaultName" ] || [ -z "$containerRegistryName" ]; then
+if [ -z "$storageAccountName" ] || [ -z "$logAnalyticsWorkspaceName" ] || [ -z "$keyVaultName" ] || [ -z "$containerRegistryName" ]; then
     echo "Some deployment outputs not found, discovering missing resources by type..."
     
     if [ -z "$storageAccountName" ]; then
@@ -76,10 +81,6 @@ if [ -z "$storageAccountName" ] || [ -z "$logAnalyticsWorkspaceName" ] || [ -z "
     
     if [ -z "$searchServiceName" ]; then
         searchServiceName=$(az search service list --resource-group $resourceGroupName --query "[0].name" -o tsv 2>/dev/null || echo "")
-    fi
-    
-    if [ -z "$apiManagementName" ]; then
-        apiManagementName=$(az apim list --resource-group $resourceGroupName --query "[0].name" -o tsv 2>/dev/null || echo "")
     fi
     
     if [ -z "$aiFoundryHubName" ]; then
@@ -243,8 +244,14 @@ echo "AI_FOUNDRY_HUB_NAME=\"$aiFoundryHubName\"" >> ../.env
 echo "AI_FOUNDRY_PROJECT_NAME=\"$aiFoundryProjectName\"" >> ../.env
 echo "AI_FOUNDRY_ENDPOINT=\"$aiFoundryEndpoint\"" >> ../.env
 echo "AI_FOUNDRY_KEY=\"$aiFoundryKey\"" >> ../.env
-acr_username=$(az acr credential show --name $containerRegistryName --query username -o tsv)
-acr_password=$(az acr credential show --name $containerRegistryName --query passwords[0].value -o tsv)
+
+if [ -n "$containerRegistryName" ]; then
+    acr_username=$(az acr credential show --name $containerRegistryName --query username -o tsv 2>/dev/null || echo "")
+    acr_password=$(az acr credential show --name $containerRegistryName --query passwords[0].value -o tsv 2>/dev/null || echo "")
+else
+    acr_username=""
+    acr_password=""
+fi
 # Construct AI Foundry Hub Endpoint if missing
 if [ -z "$aiFoundryHubEndpoint" ] && [ -n "$aiFoundryHubName" ]; then
     echo "Constructing AI Foundry Hub Endpoint..."
@@ -256,17 +263,6 @@ if [ -z "$aiFoundryHubEndpoint" ] && [ -n "$aiFoundryHubName" ]; then
 fi
 echo "AI_FOUNDRY_HUB_ENDPOINT=\"$aiFoundryHubEndpoint\"" >> ../.env
 
-# Construct AI Foundry Project Endpoint if not found in deployment outputs
-if [ -z "$aiFoundryProjectEndpoint" ] && [ -n "$aiFoundryHubName" ] && [ -n "$aiFoundryProjectName" ]; then
-    echo "Constructing AI Foundry Project Endpoint..."
-    aiFoundryProjectEndpoint="https://${aiFoundryHubName}.services.ai.azure.com/api/projects/${aiFoundryProjectName}"
-    echo "Constructed project endpoint: $aiFoundryProjectEndpoint"
-elif [ -n "$aiFoundryProjectEndpoint" ] && [[ "$aiFoundryProjectEndpoint" == *"ai.azure.com/build/overview"* ]]; then
-    # If we got a web UI URL from deployment outputs, convert it to API endpoint
-    echo "Converting web UI URL to API endpoint..."
-    aiFoundryProjectEndpoint="https://${aiFoundryHubName}.services.ai.azure.com/api/projects/${aiFoundryProjectName}"
-    echo "Converted project endpoint: $aiFoundryProjectEndpoint"
-fi
 echo "AI_FOUNDRY_PROJECT_ENDPOINT=\"$aiFoundryProjectEndpoint\"" >> ../.env
 echo "AZURE_AI_CONNECTION_ID=\"$azureAIConnectionId\"" >> ../.env
 # Azure Cosmos DB
@@ -289,7 +285,6 @@ echo "=== Configuration Summary ==="
 echo "Storage Account: $storageAccountName"
 echo "Log Analytics Workspace: $logAnalyticsWorkspaceName"
 echo "Search Service: $searchServiceName"
-echo "API Management: $apiManagementName"
 echo "AI Foundry Hub: $aiFoundryHubName"
 echo "AI Foundry Project: $aiFoundryProjectName"
 echo "Key Vault: $keyVaultName"
