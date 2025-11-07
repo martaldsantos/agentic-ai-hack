@@ -35,22 +35,36 @@ We will have 3 agents that are each responsible for gathering and processing spe
 
 | Agent | Function | Data Source/Technology | Implementation |
 |-------|----------|----------------------|----------------|
-| **Claim Reviewer Agent** | Analyzes insurance claims and damage assessments | Cosmos DB data | Azure AI Agent Service + SK Plugins |
-| **Policy Checker Agent** | Validates coverage against insurance policies | Azure AI Search connection | Azure AI Agent Service |
-| **Risk Analyzer Agent** | Evaluates risk factors and provides recommendations | Cosmos DB data | Azure AI Agent Service + SK Plugins |
-| **Master Orchestrator Agent** | Coordinates the three agents and synthesizes their outputs | Combined Plugins + Tools | Semantic Kernel Orchestration |
+| **Claim Reviewer Agent** | Analyzes insurance claims and damage assessments | Cosmos DB data | Azure OpenAI + Custom Plugins |
+| **Policy Checker Agent** | Validates coverage against insurance policies | Azure AI Search connection | Azure OpenAI |
+| **Risk Analyzer Agent** | Evaluates risk factors and provides recommendations | Cosmos DB data | Azure OpenAI + Custom Plugins |
+| **Master Orchestrator** | Coordinates the three agents and synthesizes their outputs | Combined Tools | Microsoft Agent Framework Concurrent Orchestration |
 
-### Understanding Implementation Approaches: Azure AI Agent Service vs Semantic Kernel Integration
+### Understanding Implementation Approaches: Microsoft Agent Framework
 
-When building intelligent agents, you have two primary implementation approaches available in the Azure ecosystem. **Azure AI Agent Service with direct tool connections** provides a streamlined, low-code approach where agents are configured through the Azure AI Foundry portal with direct connections to Azure services like Azure AI Search, enabling rapid prototyping and deployment with built-in enterprise features like security, monitoring, and compliance. This approach is ideal for straightforward scenarios where agents need to access specific Azure services without complex custom logic. In contrast, **Azure AI Agents with Semantic Kernel integration** offers a more flexible, code-first approach that combines the enterprise-grade capabilities of Azure AI Agent Service with Semantic Kernel's powerful plugin framework. This hybrid approach allows developers to create custom plugins with complex business logic, advanced data processing capabilities, and sophisticated integrations (like our Cosmos DB plugin for retrieving structured claim data), while still benefiting from Azure's managed infrastructure and security features. The Semantic Kernel approach is particularly valuable when you need custom data transformations, complex orchestration patterns, or when integrating with *non-Azure* services.
+**Microsoft Agent Framework** provides a modern, code-first approach to building and orchestrating AI agents. The framework offers powerful concurrent orchestration capabilities through the `ConcurrentBuilder` class, which enables multiple agents to work in parallel on the same task. This approach is ideal for scenarios where you need:
+
+- **True Parallelism**: Multiple agents analyzing the same input simultaneously from different perspectives
+- **Ensemble Reasoning**: Combining insights from multiple specialized agents for comprehensive analysis
+- **Flexible Integration**: Easy integration with Azure OpenAI, custom tools, and data sources
+- **Event-based Results**: Streaming results as they become available from each agent
+
+The Agent Framework approach is particularly valuable when you need custom orchestration patterns, sophisticated error handling, and when integrating with various data sources (like our Cosmos DB plugin for retrieving structured claim data).
 
 ## Exercise Guide - Time to Orchestrate!
 
-## Part 1- Create your Semantic Kernel Orchestrator
-Time to build your orchestrator! Please jump over to `orchestration.ipynb` file for a demonstration on how we will integrated our troop of agents to help us solve our pickle! 
-This notebook is composed of only two cells of code. The first one will have in it 4 core components: 3 are dedicated to the creation of the 3 agents we have defined and the last piece is a `task` will be the orchestrator, that defines specific instructions to orchestrate the 3 agent.
+## Part 1- Create your Microsoft Agent Framework Orchestrator
+Time to build your orchestrator! Please jump over to `orchestration.ipynb` file for a demonstration on how we will integrate our troop of agents to help us solve our challenge! 
 
-In Semantic Kernel's Orchestration, [`tasks`](https://learn.microsoft.com/en-us/semantic-kernel/frameworks/agent/agent-orchestration/group-chat?pivots=programming-language-python#invoke-the-orchestration-1) revolve around integrating AI capabilities with traditional programming through a **modular** architecture. Core tasks include creating and managing skills (collections of related AI functions), designing and using prompts for both natural language and code generation, orchestrating planners to break down goals into executable steps, and using connectors to interface with external services like APIs or databases. Developers also manage memory for context retention, handle input/output pipelines, and coordinate execution flows that combine multiple skills or plugins. These components enable building intelligent, context-aware agents that can reason, plan, and act autonomously.
+This notebook demonstrates concurrent orchestration using Microsoft Agent Framework. The implementation includes:
+
+1. **Agent Creation**: Three specialized agents (Claim Reviewer, Risk Analyzer, Policy Checker) are created using the Azure OpenAI chat client
+2. **Concurrent Workflow**: The `ConcurrentBuilder` class creates a workflow that runs all three agents in parallel
+3. **Task Distribution**: Each agent receives the same task but applies their specialized perspective
+4. **Result Aggregation**: Results are collected via an event stream as agents complete their analysis
+5. **Final Decision**: An approver agent synthesizes all analyses to provide the final claim decision
+
+In Microsoft Agent Framework, concurrent orchestration enables true parallel execution where multiple agents work simultaneously on the same problem, each applying their domain expertise. This is achieved through the `ConcurrentBuilder` which fans out the task to all participating agents and aggregates their responses.
 
 
 ## Part 2 - Now onto automation!
@@ -75,17 +89,28 @@ Response body (application/json):
 
 ### Part 2.1 Quick start
 
-   1. **Configure environment variables**: Before running the application, you need to add the following environment variables manually to your `.env` file or set them in your shell environment:
+   1. **Install required packages**: Before running the application, install the Microsoft Agent Framework and required dependencies:
 
    ```bash
-   CLAIM_REV_AGENT_ID=""
-   RISK_ANALYZER_AGENT_ID=""
-   POLICY_CHECKER_AGENT_ID=""
+   pip install azure-identity agent-framework --pre
+   ```
+   
+   Note: The `--pre` flag is required as Microsoft Agent Framework is currently in preview.
+
+   2. **Configure environment variables**: Add the following environment variables to your `.env` file or set them in your shell environment:
+
+   ```bash
+   AZURE_OPENAI_ENDPOINT=""
+   AZURE_OPENAI_KEY=""
+   AZURE_OPENAI_DEPLOYMENT_NAME=""
+   AZURE_OPENAI_API_VERSION="2024-10-01-preview"
+   COSMOS_ENDPOINT=""
+   COSMOS_KEY=""
    ```
 
-   2. Copy the .env file in root to the challenge-5 directory 
+   3. Copy the .env file in root to the challenge-5 directory 
 
-   3. Move to challenge-5 directory, create and activate a Python 3.11 virtual environment:
+   4. Move to challenge-5 directory, create and activate a Python 3.11 virtual environment:
 
    ```bash
    cd challenge-5
@@ -93,19 +118,19 @@ Response body (application/json):
    source .venv/bin/activate
    ```
 
-   4. Install dependencies:
+   5. Install dependencies:
 
    ```bash
    pip install -r requirements.txt
    ```
 
-   5. Run the app:
+   6. Run the app:
 
    ```bash
    uvicorn main:app --reload --port 8000
    ```
 
-   6. Open a new terminal and test your new app with curl:
+   7. Open a new terminal and test your new app with curl:
 
    ```bash
    CLAIM_ID="CL001"
@@ -253,11 +278,12 @@ Create environment and container app using the pushed image and set the same env
 
    ## 🎯 Conclusion
 
-Congratulations! You've successfully built a multi-agent orchestration system that coordinates three specialized insurance agents through a Master Orchestrator. Your system now handles complete insurance claim processing workflows using GroupChat orchestration patterns with Semantic Kernel.
+Congratulations! You've successfully built a multi-agent orchestration system using Microsoft Agent Framework that coordinates three specialized insurance agents through concurrent orchestration. Your system now handles complete insurance claim processing workflows with true parallel execution.
 
 **Key Achievements:**
-- Implemented a GroupChat orchestration for  agent processing
-- Created a Master Orchestrator that synthesizes outputs from multiple agents
-- Built hybrid solutions combining Azure AI Agent Service with custom Semantic Kernel plugins
+- Implemented concurrent orchestration using Microsoft Agent Framework's ConcurrentBuilder
+- Created a Master Orchestrator that synthesizes outputs from multiple agents running in parallel
+- Built hybrid solutions combining Azure OpenAI with custom tool plugins
 - Developed a production-ready framework for intelligent insurance claim processing
 - Prepared the system for enterprise deployment to an Azure Container App with scalability and monitoring capabilities
+- Leveraged modern agent orchestration patterns for efficient multi-perspective analysis
