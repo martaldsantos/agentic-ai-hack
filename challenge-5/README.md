@@ -83,6 +83,14 @@ Response body (application/json):
    POLICY_CHECKER_AGENT_ID=""
    ```
 
+   > **📍 How to get Agent IDs from Azure AI Foundry:**
+   > 1. Go to the [Azure AI Foundry portal](https://ai.azure.com)
+   > 2. Navigate to your project
+   > 3. In the left menu, select **Agents** under the "Build and customize" section
+   > 4. You will see a list of all your created agents (Claim Reviewer, Risk Analyzer, Policy Checker)
+   > 5. Click on each agent to view its details and copy the **Agent ID** from the agent's overview page
+   > 6. Paste each Agent ID into the corresponding environment variable in your `.env` file
+
    2. Copy the .env file in root to the challenge-5 directory 
 
    3. Move to challenge-5 directory, create and activate a Python 3.11 virtual environment:
@@ -115,6 +123,8 @@ Response body (application/json):
 
 ### Part 2.2 - Build and Run with Docker locally
 
+> ⚠️ **Important**: Before running the Docker container, make sure to stop the FastAPI server from Part 2.1 (if still running) to free up port 8000. Press `Ctrl+C` in the terminal where `uvicorn` is running.
+
 1. Build the Docker image (make sure you are still on the challenge-5 directory):
 
    ```bash
@@ -130,7 +140,16 @@ Response body (application/json):
    ```
    If you run into any permission errors, first run `chmod +x challenge-5/create-service-principal.sh`
 
-   Copy the outputed variables and paste them in your local `.env` file.
+   > 📝 **After running the script**, copy the environment variables from the terminal output into your `.env` file. The output will look like:
+   > ```
+   > Environment Variables for .env file:
+   > ============================================
+   > AZURE_CLIENT_ID="<your-client-id>"
+   > AZURE_CLIENT_SECRET="<your-client-secret>"
+   > AZURE_TENANT_ID="<your-tenant-id>"
+   > ```
+   > Make sure to add these three variables to your `.env` file before proceeding.
+
    Then, it's time to run the container with the necessary environment variables:
 
    ```bash
